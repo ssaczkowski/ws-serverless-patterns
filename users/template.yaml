@@ -8,7 +8,7 @@ Description: >
 
 Globals:
   Function:
-    Runtime: python3.10
+    Runtime: python3.14
     MemorySize: 128
     Timeout: 100
     Tracing: Active
