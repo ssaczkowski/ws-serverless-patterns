@@ -4,7 +4,7 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Transform: AWS::Serverless-2016-10-31
 Description: >
-  SAM Template for Serverless Patterns v7 - Observability - Alarms
+  SAM Template for Serverless Patterns v8 - Observability - Dashboard
 
 Globals:
   Function:
@@ -290,6 +290,84 @@ Resources:
       Statistic: Sum
       Threshold: 1.0
 
+  ApplicationDashboard:
+    Type: AWS::CloudWatch::Dashboard
+    Properties:
+      DashboardName: !Sub "${AWS::StackName}-dashboard"
+      DashboardBody:
+        Fn::Sub: >
+          {
+            "widgets": [
+                {
+                    "height": 6,
+                    "width": 6,
+                    "y": 6,
+                    "x": 0,
+                    "type": "metric",
+                    "properties": {
+                        "metrics": [
+                            [ "AWS/Lambda", "Invocations", "FunctionName", "${UsersFunction}" ],
+                            [ ".", "Errors", ".", "." ],
+                            [ ".", "Throttles", ".", "." ],
+                            [ ".", "Duration", ".", ".", { "stat": "Average" } ],
+                            [ ".", "ConcurrentExecutions", ".", ".", { "stat": "Maximum" } ]
+                        ],
+                        "view": "timeSeries",
+                        "region": "${AWS::Region}",
+                        "stacked": false,
+                        "title": "Users Lambda",
+                        "period": 60,
+                        "stat": "Sum"
+                    }
+                },
+                {
+                    "height": 6,
+                    "width": 6,
+                    "y": 6,
+                    "x": 6,
+                    "type": "metric",
+                    "properties": {
+                        "metrics": [
+                            [ "AWS/Lambda", "Invocations", "FunctionName", "${AuthorizerFunction}" ],
+                            [ ".", "Errors", ".", "." ],
+                            [ ".", "Throttles", ".", "." ],
+                            [ ".", "Duration", ".", ".", { "stat": "Average" } ],
+                            [ ".", "ConcurrentExecutions", ".", ".", { "stat": "Maximum" } ]
+                        ],
+                        "view": "timeSeries",
+                        "region": "${AWS::Region}",
+                        "stacked": false,
+                        "title": "Authorizer Lambda",
+                        "period": 60,
+                        "stat": "Sum"
+                    }
+                },
+                {
+                    "height": 6,
+                    "width": 12,
+                    "y": 0,
+                    "x": 0,
+                    "type": "metric",
+                    "properties": {
+                        "metrics": [
+                            [ "AWS/ApiGateway", "4XXError", "ApiName", "${AWS::StackName}", { "yAxis": "right" } ],
+                            [ ".", "5XXError", ".", ".", { "yAxis": "right" } ],
+                            [ ".", "DataProcessed", ".", ".", { "yAxis": "left" } ],
+                            [ ".", "Count", ".", ".", { "label": "Count", "yAxis": "right" } ],
+                            [ ".", "IntegrationLatency", ".", ".", { "stat": "Average" } ],
+                            [ ".", "Latency", ".", ".", { "stat": "Average" } ]
+                        ],
+                        "view": "timeSeries",
+                        "stacked": false,
+                        "region": "${AWS::Region}",
+                        "period": 60,
+                        "stat": "Sum",
+                        "title": "API Gateway"
+                    }
+                }
+            ]
+          }
+
 Outputs:
   UsersTable:
     Description: DynamoDB Users table
@@ -326,3 +404,7 @@ Outputs:
   AlarmsTopic:
     Description: "SNS Topic to be used for the alarms subscriptions"
     Value: !Ref AlarmsTopic
+
+  DashboardURL:
+    Description: "Dashboard URL"
+    Value: !Sub "https://console.aws.amazon.com/cloudwatch/home?region=${AWS::Region}#dashboards:name=${ApplicationDashboard}"
