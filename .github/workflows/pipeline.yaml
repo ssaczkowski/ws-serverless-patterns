@@ -10,7 +10,7 @@ on:
       - 'feature**'
 
 env:
-  SAM_TEMPLATE: template.yaml
+  SAM_TEMPLATE: users/template.yaml
   TESTING_STACK_NAME: users-dev
   TESTING_PIPELINE_EXECUTION_ROLE: arn:aws:iam::154425416709:role/aws-sam-cli-managed-dev-pipel-PipelineExecutionRole-ethHjzKy91vs
   TESTING_CLOUDFORMATION_EXECUTION_ROLE: arn:aws:iam::154425416709:role/aws-sam-cli-managed-dev-p-CloudFormationExecutionRo-j8iQqUtHikQb
